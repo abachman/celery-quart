@@ -1,0 +1,15 @@
+#!/usr/bin/env python
+
+import os
+import subprocess
+import argparse
+
+args = argparse.ArgumentParser()
+args.add_argument('command', nargs=argparse.REMAINDER)
+args = args.parse_args()
+
+command = ['docker', 'compose', '--progress=quiet', 'run', '--rm', 'web'] + args.command
+
+print(f"\033[2m> {' '.join(command)}\033[0m")
+
+subprocess.run(command, shell=False)

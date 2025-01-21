@@ -1,0 +1,9 @@
+{
+  "editor.formatOnSave": true,
+  "workbench.colorTheme": "Dracula Theme",
+  "[python]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit"
+    }
+  }
+}

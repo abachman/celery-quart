@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+
+import json
+import subprocess
+import argparse
+
+args = argparse.ArgumentParser(
+    description="send a message to the chat API for completion"
+)
+args.add_argument("command", nargs=argparse.REMAINDER)
+args = args.parse_args()
+
+message = " ".join(args.command)
+payload = json.dumps({"message": message})
+command = [
+    "curl",
+    "-XPOST",
+    "--data",
+    payload,
+    "--header",
+    "Content-Type: application/json",
+    "localhost:5000/api/chat",
+]
+
+print(f"\033[2m> {' '.join(command)}\033[0m")
+
+subprocess.run(command, shell=False)

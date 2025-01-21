@@ -1,0 +1,15 @@
+#!/usr/bin/env python
+
+import subprocess
+import argparse
+
+args = argparse.ArgumentParser(description="get result of a task")
+args.add_argument("task_id", nargs=argparse.REMAINDER)
+args = args.parse_args()
+
+task_id = args.task_id[0]
+command = ["curl", f"localhost:5000/api/response/{task_id}"]
+
+print(f"\033[2m> {' '.join(command)}\033[0m")
+
+subprocess.run(command, shell=False)

@@ -1,0 +1,9 @@
+<div
+  class="response"
+  hx-get="/api/response/{{task_id}}/poll"
+  hx-trigger="load delay:1s"
+  hx-swap="outerHTML"
+>
+  <span class="loader" role="status"></span>
+  generating...
+</div>

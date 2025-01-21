@@ -1,0 +1,20 @@
+[project]
+name = "celery-quart"
+version = "0.1.0"
+description = "jammin on a thing"
+readme = "README.md"
+requires-python = ">=3.12.2"
+dependencies = [
+    "asyncpg>=0.30.0",
+    "better-exceptions>=0.3.3",
+    "celery[redis]>=5.4.0",
+    "mistune>=3.1.0",
+    "ollama>=0.4.6",
+    "python-dotenv>=1.0.1",
+    "quart>=0.20.0",
+    "sqlalchemy[asyncio]>=2.0.37",
+    "structlog>=25.1.0",
+]
+
+[dependency-groups]
+dev = ["ruff>=0.9.2"]
