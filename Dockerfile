@@ -31,5 +31,4 @@ ENV PATH="/app/.venv/bin:$PATH"
 # Reset the entrypoint, don't invoke `uv`
 ENTRYPOINT []
 
-# Uses `--host 0.0.0.0` to allow access from outside the container
-CMD ["quart", "run", "--host", "0.0.0.0"]
+CMD ["quart", "run", "--host", "0.0.0.0", "--port", "5000", "--reload"]

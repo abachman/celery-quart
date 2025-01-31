@@ -7,10 +7,11 @@ from quart import Blueprint, jsonify, request, render_template
 from src.logging import log
 from src.worker import get_task
 
-api = Blueprint("api", __name__)
+background = Blueprint("background", __name__)
 
 
-@api.post("/chat")
+# 1. send a POST request to /chat to start a background generation task
+@background.post("/chat")
 async def chat():
     data = await request.form
     if not data or "message" not in data:
@@ -24,8 +25,8 @@ async def chat():
     return await render_template("response_poll.html", task_id=task.id)
 
 
-# JSON response polling endpoint
-@api.get("/response/<task_id>")
+# 2. poll ths response endpoint to get the result when it becomes available
+@background.get("/response/<task_id>")
 async def response(task_id: str):
     structlog.contextvars.bind_contextvars(task_id=task_id)
 
@@ -58,7 +59,7 @@ class PromptResponse(BaseModel):
 
 
 # htmx compatible response polling
-@api.get("/response/<task_id>/poll")
+@background.get("/response/<task_id>/poll")
 async def response_poll(task_id: str):
     structlog.contextvars.bind_contextvars(task_id=task_id)
 
@@ -70,6 +71,3 @@ async def response_poll(task_id: str):
     message = result.result["message"]
     response = PromptResponse(**message, **result.result)
     return await render_template("response.html", response=response)
-
-
-#

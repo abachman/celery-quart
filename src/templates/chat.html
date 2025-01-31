@@ -1,0 +1,239 @@
+{% extends "layout/base.html" %} {% block body %}
+<script>
+  function Debug(name) {
+    return (...msg) => {
+      console.log(`\x1B[34;1m[${name}]\x1B[0m`, ...msg);
+    };
+  }
+
+  const sd = new Debug("stream");
+  async function stream(data, handler) {
+    const response = await fetch("/streaming/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    for await (const chunk of response.body) {
+      const data = new TextDecoder("utf-8").decode(chunk);
+      try {
+        handler(JSON.parse(data));
+      } catch (e) {
+        sd("error", e);
+      }
+    }
+  }
+
+  class Conversation {
+    constructor(el) {
+      this.messages = [];
+      this.el = el;
+      this.state = "idle";
+      this.converter = new showdown.Converter();
+      this.log = new Debug("conv");
+    }
+
+    // a prompt request has phases:
+    // 1. prepare the request
+    //    1a. render user message
+    //    1b. prepare placeholder for assistant response
+    // 2. send the request
+    // 3. receive chunks of the response
+    //    3a. add chunk content to the placeholder
+    // 4. receive done
+    // 5. finalize the messages in conversation
+
+    // add a partial response to the last message
+    prompt(promptString, model) {
+      const data = {
+        prompt: promptString,
+        model,
+        conversation: {
+          messages: this.messages,
+        },
+      };
+
+      const userMessage = {
+        role: "user",
+        content: promptString,
+      };
+
+      // add message to page
+      const userMessageEl = document.createElement("div");
+      userMessageEl.classList.add("message");
+      userMessageEl.classList.add("user");
+      userMessageEl.textContent = promptString;
+      this.el.appendChild(userMessageEl);
+
+      const assistantMessage = {
+        role: "assistant",
+        content: "",
+      };
+      const assistantMessageEl = document.createElement("div");
+      assistantMessageEl.classList.add("message");
+      assistantMessageEl.classList.add("assistant");
+      this.el.appendChild(assistantMessageEl);
+
+      const scrollTarget = document.createElement("div");
+      scrollTarget.classList.add("scroll-target");
+      this.el.appendChild(scrollTarget);
+
+      const updateAnswer = (content) => {
+        this.log("updateAnswer with", content);
+        assistantMessage.content += content;
+        assistantMessageEl.innerHTML = this.converter.makeHtml(
+          assistantMessage.content
+        );
+        this.log("got", assistantMessage.content);
+        scrollTarget.scrollIntoView();
+      };
+
+      const handler = (chunk) => {
+        if (this.state === "ready") {
+          this.state === "generating";
+        }
+
+        updateAnswer(chunk.message.content);
+
+        if (chunk.done) {
+          this.log("done");
+          // add messages to conversation
+          this.messages.push(userMessage);
+          this.messages.push(assistantMessage);
+          this.state = "idle";
+        }
+      };
+
+      this.state = "ready";
+      this.log("data and handler are ready");
+      return { data, handler };
+    }
+  }
+
+  let conversation = null;
+
+  const gd = new Debug("generate");
+  async function generate(evt) {
+    evt.preventDefault();
+
+    if (conversation === null) {
+      conversation = new Conversation(document.querySelector(".messages"));
+    }
+
+    if (conversation.state !== "idle") {
+      console.error("conversation is busy");
+      return;
+    }
+
+    // @type HTMLFormElement
+    const form = evt.target;
+    const prompt = form.elements.namedItem("prompt").value;
+    const model = form.elements.namedItem("model").value;
+    gd("form", { prompt, model });
+
+    const { data, handler } = conversation.prompt(prompt, model);
+    stream(data, handler);
+    form.elements.namedItem("prompt").value = "";
+  }
+</script>
+
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+
+  .chat {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    height: 100dvh;
+    width: 640px;
+    margin: 0 auto;
+  }
+
+  .messages {
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+    padding-top: 1rem;
+
+    & .scroll-target {
+      height: 1px;
+    }
+
+    & .message {
+      width: 80%;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    & .message.user {
+      background-color: #bbe;
+      align-self: flex-end;
+    }
+
+    & .message.assistant {
+      background-color: #ddd;
+      align-self: flex-start;
+    }
+  }
+
+  .input {
+    padding: 1rem 0;
+
+    & form {
+      & select {
+        margin-bottom: 1rem;
+      }
+
+      & .prompt {
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+        align-items: center;
+        justify-content: stretch;
+
+        & input {
+          flex-grow: 1;
+          height: 2rem;
+        }
+
+        & button {
+          width: 100px;
+          height: 2rem;
+        }
+    }
+  }
+</style>
+
+<div class="chat">
+  <header>
+    <h3>{{ conversation_id }}</h3>
+  </header>
+
+  <div class="messages"></div>
+
+  <div class="input">
+    <form onsubmit="generate(event)">
+      <select name="model" id="model-select">
+        <option selected value="llama3.2">Llama 3.2 3B</option>
+        <option value="deepseek-r1:7b">Deepseek R1 7B (Qwen distilled)</option>
+        <option value="llama3.1:latest">Llama 3.1 8B</option>
+      </select>
+      <div class="prompt">
+        <input
+          name="prompt"
+          type="text"
+          placeholder="What is the thing?"
+          value="Is a bear smarter than a fish?"
+        />
+        <button type="submit">Send</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -5,6 +5,7 @@ description = "jammin on a thing"
 readme = "README.md"
 requires-python = ">=3.12.2"
 dependencies = [
+    "alembic>=1.14.1",
     "asyncpg>=0.30.0",
     "better-exceptions>=0.3.3",
     "celery[redis]>=5.4.0",

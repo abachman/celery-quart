@@ -1,3 +1,8 @@
+volumes:
+  postgres_data:
+  app_venv:
+  uv_cache:
+
 services:
   web: &web
     build: .
@@ -6,9 +11,9 @@ services:
     volumes:
       - .:/app
       - app_venv:/app/.venv
-    environment:
-      - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=postgresql+asyncpg://postgres:password@postgres:5432/prompter
+      - uv_cache:/root/.cache/uv
+    env_file:
+      - .env.local
     depends_on:
       - redis
       - postgres
@@ -43,7 +48,3 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
-  app_venv:

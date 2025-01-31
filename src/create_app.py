@@ -2,7 +2,7 @@ import os
 
 from quart import Quart
 
-from src.api import api
+from src.api import background, streaming
 from src.commands import attach_commands
 from src.worker import celery_init_app
 
@@ -18,7 +18,8 @@ def create_app() -> Quart:
         ),
     )
 
-    app.register_blueprint(api, url_prefix="/api")
+    app.register_blueprint(background, url_prefix="/api")
+    app.register_blueprint(streaming, url_prefix="/streaming")
 
     celery_init_app(app)
     attach_commands(app)

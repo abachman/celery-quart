@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% block head %}
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/htmx.org@1.9.12/dist/htmx.min.js"
+      integrity="sha256-RJMXreeIHpSVENthSZHhlcOgmcTHkcJNrOxV+fSipFI="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"
+      integrity="sha256-iOtvu+DCcN3zOEruDJYg0HDgkKJuB8Z0Ia42yQO11kk="
+      crossorigin="anonymous"
+    ></script>
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <script src="{{ url_for('static', filename='streaming.js') }}"></script> -->
+    {% endblock %}
+  </head>
+  <body>
+    <main>{% block body %}{% endblock %}</main>
+  </body>
+</html>
