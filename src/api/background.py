@@ -4,10 +4,11 @@ from celery.result import AsyncResult
 from pydantic import BaseModel
 from quart import Blueprint, jsonify, request, render_template
 
-from src.logging import log
+from src.logging import get_logger
 from src.worker import get_task
 
-background = Blueprint("background", __name__)
+background = Blueprint("background", __name__, url_prefix="/background")
+log = get_logger(__name__)
 
 
 # 1. send a POST request to /chat to start a background generation task

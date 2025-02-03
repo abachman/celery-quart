@@ -1,14 +1,25 @@
 #!/usr/bin/env python
 
-import os
 import subprocess
 import argparse
 
 args = argparse.ArgumentParser()
-args.add_argument('command', nargs=argparse.REMAINDER)
+args.add_argument("command", nargs=argparse.REMAINDER)
 args = args.parse_args()
 
-command = ['docker', 'compose', '--progress=quiet', 'run', '--rm', 'web'] + args.command
+if args.command == "npm":
+    service = "frontend"
+else:
+    service = "web"
+
+command = [
+    "docker",
+    "compose",
+    "--progress=quiet",
+    "run",
+    "--rm",
+    service,
+] + args.command
 
 print(f"\033[2m> {' '.join(command)}\033[0m")
 

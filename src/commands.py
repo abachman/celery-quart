@@ -8,10 +8,11 @@ import click
 from alembic.config import Config
 from alembic import command
 
-from src.logging import log
+from src.logging import get_logger
 from src.storage import Base, get_database_engine
 from src.worker import get_task_from_app
 
+log = get_logger(__name__)
 alembic_cfg = Config(os.path.join(os.path.dirname(__file__), "../alembic.ini"))
 
 

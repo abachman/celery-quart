@@ -1,8 +1,10 @@
 from ollama import Client, ChatResponse
 from typing import Literal, AsyncGenerator
 
-from src.logging import log
+from src.logging import get_logger
 from .types import Completion, GenerateRequest
+
+log = get_logger(__name__)
 
 # ChatResponse(
 #     model="llama3.2",

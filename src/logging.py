@@ -16,4 +16,7 @@ structlog.configure(
     logger_factory=structlog.PrintLoggerFactory(),
     cache_logger_on_first_use=False,
 )
-log = structlog.get_logger()
+
+
+def get_logger(name):
+    return structlog.get_logger(name)

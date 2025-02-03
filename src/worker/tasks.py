@@ -6,7 +6,9 @@ from celery import Task
 from ollama import ChatResponse, Client
 from quart import Quart, current_app
 
-from src.logging import log
+from src.logging import get_logger
+
+log = get_logger(__name__)
 
 
 def register_tasks(celery_app):
